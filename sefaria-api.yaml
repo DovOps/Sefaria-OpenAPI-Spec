@@ -1,0 +1,798 @@
+openapi: 3.0.0
+servers:
+  - description: Sefaria Website (sefaria.org)
+    url: https://www.sefaria.org
+  - description: Sefaria Israel (sefaria.org.il)
+    url: https://www.sefaria.org.il 
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/DovOps/Sefaria-Project/1.0.2
+
+info:
+  description: The Sefaria APIs allows live access to Sefaria's structured database of Jewish texts and their interconnections. It is designed to make getting up and running with a new web or mobile app as simple as possible. If you want to run your own database, please don't use this API to grab our data; instead you can download a complete dump of our data on GitHub.
+  
+    <p>This documentation is based on [Sefaria API Documentation on GitHub](https://github.com/Sefaria/Sefaria-Project/wiki/API-Documentation) 
+    
+    <p>NOTE - the Sheets, Topics, Lexicon, Shape, Terms and Calendar APIs have not yet been documented in this spec.
+    
+  version: 1.0.2
+  title: Sefaria APIs
+  contact:
+    email: dov@dovkatz.net
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: Index API
+    description: A text index in Sefaria is a schema describing the names and structure of a text. 
+  - name: Name API
+    description: Used as primarily as an "autocompleter", the name api takes a string and attempts to match that string against our data.
+  - name: Links API
+    description: Returns a list of connections known for the given segment of text.
+  - name: Text API
+    description: Retrieves the text and other metadata for the text reference string ref (Documentation on text references).
+  - name: Search API (v1)
+    description: For the simpler version of this API, see Search API (v2).
+  - name: Search API (v2)
+    description: Simpler search API than Search API (v1) which exposes the main search functionality available on the site. 
+
+
+
+paths:
+
+  /api/texts/{ref}:
+    get:
+      tags:
+        - Text API
+      summary: Retrieves the text and other metadata for the text reference string ref (Documentation on text references).
+      operationId: getTextsByRef
+      description: Retrieves the text and other metadata for the text reference string ref (Documentation on text references). 
+      
+       
+        You can request a particular version of a text by specifying a version title and language, to the parameters lang and version. lang should be a two character language code. Spaces in version may be replaced with underscores ("_").
+
+        * `context=0` may be used to suppress the default behavior of returning surrounding texts when only a single segment is requested.
+
+        * `commentary=1`  include a list of known connections to other texts along with the requested text.
+
+        * `pad=0`  will prevent default behavior of padding a ref down to a section level. Without `pad=0`  requests for Genesis will be resolved to Genesis 1. With, it a request for Genesis returns the entire book.
+      
+      parameters:
+        - in: path
+          name: ref
+          description: Valid Ref object (Shabbat.1a, etc)
+          required: true
+          example: Shabbat.1a
+          schema:
+            type: string
+        - in: query
+          name: commentary
+          description: (1 or 0) Include a list of known connections to other texts along with the requested text.
+          schema: 
+            type: integer
+            default: 0
+        - in: query
+          name: context
+          description: (1 or 0) may be used to suppress the default behavior of returning surrounding texts when only a single segment is requested.
+          schema: 
+            type: integer
+            default: 1
+        - in: query
+          name: pad
+          description: (1 or 0)  will prevent default behavior of padding a ref down to a section level. Without pad=0 requests for Genesis will be resolved to Genesis 1. With, it a request for Genesis returns the entire book.
+          schema: 
+            type: integer
+            default: 1
+            
+      responses:
+        '200':
+          description: Text and metadata for a given ref
+          content:
+            application/json:
+              schema:
+                type: object  
+
+  /api/texts/{ref}/{lang}:
+    get:
+      tags:
+        - Text API
+      summary: Retrieves the text and other metadata for the text reference string ref in a specific language (See Above Definition)
+      operationId: getTextsByRefLang
+      description: See Above Definition. API Spec Format requires all parameters be required in path, so we need multiple definitions of this call.
+      
+      parameters:
+        - in: path
+          name: ref
+          description: Valid Ref object (Shabbat.1a, etc)
+          required: true
+          example: Shabbat.1a
+          schema:
+            type: string
+            format: /^[a-z]{2}$/
+        - in: path
+          name: lang
+          description: Language (en,he)
+          required: true
+          example: he
+          schema:
+            type: string
+        - in: query
+          name: commentary
+          description: (1 or 0) Include a list of known connections to other texts along with the requested text.
+          schema: 
+            type: integer
+            default: 0
+        - in: query
+          name: context
+          description: (1 or 0) may be used to suppress the default behavior of returning surrounding texts when only a single segment is requested.
+          schema: 
+            type: integer
+            default: 1
+        - in: query
+          name: pad
+          description: (1 or 0)  will prevent default behavior of padding a ref down to a section level. Without pad=0 requests for Genesis will be resolved to Genesis 1. With, it a request for Genesis returns the entire book.
+          schema: 
+            type: integer
+            default: 1
+            
+      responses:
+        '200':
+          description: Text and metadata for a given ref and lang
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: object  
+
+  /api/texts/{ref}/{lang}/{version}:
+    get:
+      tags:
+        - Text API
+      summary: Retrieves the text and other metadata for the text reference string ref in a specific language and a specific version(See Above Definition)
+      operationId: getTextsByRefLangVersion
+      description: See Above Definition. API Spec Format requires all parameters be required in path, so we need multiple definitions of this call.
+      
+      parameters:
+        - in: path
+          name: ref
+          description: Valid Ref object (Shabbat.1a, etc)
+          required: true
+          example: Shabbat.1a
+          schema:
+            type: string
+            format: /^[a-z]{2}$/
+        - in: path
+          name: lang
+          description: Language (en,he)
+          required: true
+          example: he
+          schema:
+            type: string
+        - in: path
+          name: version
+          description: Version
+          required: true
+          example: 1
+          schema:
+            type: string
+        - in: query
+          name: commentary
+          description: (1 or 0) Include a list of known connections to other texts along with the requested text.
+          schema: 
+            type: integer
+            default: 0
+        - in: query
+          name: context
+          description: (1 or 0) may be used to suppress the default behavior of returning surrounding texts when only a single segment is requested.
+          schema: 
+            type: integer
+            default: 1
+        - in: query
+          name: pad
+          description: (1 or 0)  will prevent default behavior of padding a ref down to a section level. Without pad=0 requests for Genesis will be resolved to Genesis 1. With, it a request for Genesis returns the entire book.
+          schema: 
+            type: integer
+            default: 1
+            
+      responses:
+        '200':
+          description: Text and metadata for a given ref lang and version
+          content:
+            application/json:
+              schema:
+                type: object  
+
+
+
+  /api/links/{ref}:
+    get:
+      tags:
+        - Links API
+      summary: Returns a list of connections known for the given segment of text.
+      operationId: getLinks
+      description: Returns an array of objects with text. (you can supply with_text=0 to suppress text being returned)
+      
+      parameters:
+        - in: path
+          name: ref
+          description: Valid Ref object (Shabbat.1a, etc)
+          required: true
+          example: Shabbat.1a
+          schema:
+            type: string
+        - in: query
+          name: with_text
+          description: Include text segment from the reference in each result
+          schema: 
+            type: integer
+            default: 1
+            
+      responses:
+        '200':
+          description: List of connections for a given segment of text
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Link'    
+
+  /api/name/{name}:
+    get:
+      tags:
+        - Name API
+      summary: Returns autocomplete options based on names
+      operationId: getNames
+      description: |
+        Used as primarily as an "autocompleter", the name api takes a string and attempts to match that string against our data. 
+        # Some Examples #
+        
+        ## A name ##
+        <code>/name/Rashi</code>
+        
+        Rashi is both a person and a commentator (and as such, Sefaria has many indices that start with his name). Rashi is not a valid Ref, but the suggested completions will lead to valid indices and Refs.
+        
+        ## A Ref ##
+        <code>/name/Shabbat.2a</code>
+        
+        Since Shabbat 2a is a valid Sefaria Ref, and data about this reference is supplied. On the other hand, no suggestions for auto-completion are supplied.
+        
+        ## A random string ##
+        <code>/name/foo</code>
+        
+          It is possible to query any string against the name api. In this case, the name api will attempt to supply the best possible matches to the string.
+        
+        The name api will attempt to reverse your keyboard from English to Hebrew (and vice versa) if no matches are found. For example, by typing the word בראשית with an English keyboard I will get crtah
+        
+      parameters:
+        - in: path
+          name: name
+          description: pass an optional search string for looking up inventory
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: search results matching criteria
+          content:
+            application/json:
+              schema:
+                type: object
+                items:
+                  $ref: '#/components/schemas/NameResponse'
+        '400':
+          description: bad input parameter
+          
+  /api/index:
+    get:
+      tags:
+        - Index API
+      description: Returns an object representing the table of contents of all texts currently known. Texts are grouped by their categories and ordered along with basic metadata for each. Useful for building a table of contents.
+      parameters:
+        - in: query
+          name: with_content_counts
+          schema:
+            type: integer
+            default: 0
+          description: will return the exact length for each JaggedArrayNode in the index
+      responses:
+        '200':
+          description: Response value (very large)
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/index/titles:
+    get:
+      tags:
+        - Index API
+      description: Returns a list of all known text titles, including title variants and abbreviations. Useful for checking citations or user input of text names.
+      parameters:
+        - in: query
+          name: with_content_counts
+          schema:
+            type: integer
+            default: 0
+          description: will return the exact length for each JaggedArrayNode in the index
+      responses:
+        '200':
+          description: Returns an object representing the table of contents of all texts currently known. Texts are grouped by their categories and ordered along with basic metadata for each. Useful for building a table of contents.  
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/index/{title}:
+    get:
+      tags:
+        - Index API
+      description: Returns metadata about the requested text, including section names, title variants, categories, and orders. The data is returned in a legacy form that only supports simple texts. See the two endpoints below.
+      parameters:
+        - in: path
+          name: title
+          schema:
+            type: string
+            example: Bereshit 
+          required: true
+        - in: query
+          name: with_content_counts
+          schema:
+            type: integer
+            default: 0
+          description: will return the exact length for each JaggedArrayNode in the index
+      responses:
+        '200':
+          description: Returns metadata about the requested text, including section names, title variants, categories, and orders. The data is returned in a legacy form that only supports simple texts. See the two endpoints below. 
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/v2/index/{title}:
+    get:
+      tags:
+        - Index API
+      description: Returns an index record, whether simple or complex, in the new format. The index record will be padded with related information.
+          * references to shared titles are expanded
+          * textual previews for alternate structures are included
+
+      parameters:
+        - in: path
+          name: title
+          schema:
+            type: string
+            example: Bereshit 
+          required: true
+        - in: query
+          name: with_content_counts
+          schema:
+            type: integer
+            default: 0
+          description: will return the exact length for each JaggedArrayNode in the index
+      responses:
+        '200':
+          description: Returns an index record, whether simple or complex, in the new format. The index record will be padded with related information. You can also get the raw format using /v2/raw/index 
+          content:
+            application/json:
+              schema:
+                type: object
+                
+  /api/v2/raw/index/{title}:
+    get:
+      tags:
+        - Index API
+      description: Returns the raw index record, as it is stored in the db. To edit a complex Index record via the API, use /api/v2/raw/index to GET and POST it.
+
+      parameters:
+        - in: path
+          name: title
+          schema:
+            type: string
+            example: Bereshit 
+          required: true
+        - in: query
+          name: with_content_counts
+          schema:
+            type: integer
+            default: 0
+          description: will return the exact length for each JaggedArrayNode in the index
+      responses:
+        '200':
+          description: Returns the raw index record, as it is stored in the db. To edit a complex Index record via the API, use /api/v2/raw/index to GET and POST it.
+
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/search/{index}/_search:
+    post:
+      parameters:
+        - in: path
+          name: index
+          required: true
+          schema:
+            type: string
+            enum:
+              - text
+              - sheet
+      tags:
+      - Search API (v1)
+      description: For the simpler version of this API, see Search API (v2). This API is simply a proxy for the ElasticSearch API which can be fairly complicated.
+      
+        Makes a query to Sefaria\'s search engine and returns results. Note our search engine is built on ElasticSearch. The current version of ElasticSearch we\'re using is 6.2.3. To read the complete documentation of their API, see their full documentation.
+
+        Full documentation on search is available [here](https://www.elastic.co/guide/en/elasticsearch/reference/6.2/search.html)
+        
+      requestBody:
+        content:
+          application/json; charset=utf-8:
+            schema:
+              $ref: '#/components/schemas/SearchRequestV1'
+            examples:
+              "Sample query for extract text results":
+                description: Sample query for extract text results
+                value:
+                  from: 0
+                  size: 10
+                  highlight:
+                    pre_tags:
+                    - "<b>"
+                    post_tags:
+                    - "</b>"
+                    fields:
+                      exact:
+                        fragment_size: 200
+                  sort: 
+                  - comp_date: {}
+                  - order: {}
+                  query:
+                    match_phrase:
+                      exact:
+                        query: "moshe"
+              "Query using broad analyzer (`sefaria-naive-lemmatizer`)":
+                description:  This parses Hebrew queries using heuristics. This involves converting plural to singular, removing prefixes and dealing with מלא and חסר spellings.
+                value:
+                  size: 10
+                  highlight:
+                    pre_tags:
+                    - "<b>"
+                    post_tags:
+                    - "</b>"
+                    fields:
+                      naive_lemmatizer:
+                        fragment_size: 200
+                  sort: 
+                  - comp_date: {}
+                  - order: {}
+                  aggs:
+                    category:
+                      terms:
+                        field: "path"
+                        size: 10000
+                  query:
+                    match_phrase:
+                      naive_lemmatizer:
+                        query: "moshe"
+                        slop: 10
+              "Query text using relevance ranking":
+                description: Query text using relevance ranking. Ranking is based on a variation of the [PageRank](https://en.wikipedia.org/wiki/PageRank) algorithm using our link set plus references cited in source sheets.
+                value:
+                  size: 10
+                  highlight:
+                    pre_tags:
+                    - "<b>"
+                    post_tags:
+                    - "</b>"
+                    fields:
+                      naive_lemmatizer:
+                        fragment_size: 200
+                  query:
+                    function_score:
+                      field_value_factor:
+                        field: "pagesheetrank"
+                        missing: 0.04
+                      query:
+                        match_phrase:
+                          naive_lemmatizer:
+                            query: "moshe"
+                            slop: 10
+              "Query filtered to a specific book in our library":
+                description: Query filtered to a specific book in our library. NOTE in the filter we include a list of regular expressions that should be matched. In this case, we specify a regex on the `path` field
+                value:
+                  size: 10
+                  highlight:
+                    pre_tags:
+                    - "<b>"
+                    post_tags:
+                    - "</b>"
+                    fields:
+                      exact:
+                        fragment_size: 200
+                  sort: 
+                  - comp_date: {}
+                  - order: {}
+                  query:
+                    bool:
+                      must:
+                        match_phrase:
+                          exact:
+                            query: "moshe"
+                      filter:
+                        bool:
+                          should:
+                          - regexp:
+                              path: "Mishnah/Seder Zeraim/Mishnah Kilayim.*"
+      responses:
+        '200':
+          description: The API returns results in the standard ElasticSearch format.  
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/SearchResults'
+
+  /api/search/{index}/_analyze:
+    post:
+      tags: 
+      - "Search API (v1)"
+      description: See how a query will be analyzed by ElasticSearch --  [Full Documentation](https://www.elastic.co/guide/en/elasticsearch/reference/6.2/indices-analyze.html)
+      parameters:
+      - in: path
+        name: index
+        required: true
+        schema:
+          type: string
+          enum:
+            - text
+            - sheet
+      requestBody:
+        content:
+          application/json; charset=utf-8:
+            schema:
+              type: object
+              properties:
+                analyzer:
+                  type: string
+                  description: "Name of analyzer you want to use. Currently Sefaria uses the `standard` analyzer for exact searches and `sefaria-native-lemmatizer` analyzer for broad searches"
+                  default: "standard"
+                text:
+                  type: string
+                  description: "Text you want to analyze"
+            example:
+              analyzer: standard
+              text: moshe
+      responses:
+        '200':
+          description: The API returns ElasticSearch query plan
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: object
+
+  /api/search-wrapper:
+    post:
+      tags:
+      - Search API (v2)
+      description: Simpler search API than Search API (v1) which exposes the main search functionality available on the site.  
+      requestBody:
+        content:
+          application/json; charset=utf-8:
+            schema:
+              $ref: '#/components/schemas/SearchRequestV2'
+            examples:
+              "Moshe in any text":
+                value:
+                  query: "Moshe"
+                  type: "text"
+              "Moshe in any source sheet":
+                value:
+                  query: "Moshe"
+                  type: "sheet"
+                  field: "content"
+                description: "Note you must specify content as the field to search source sheets"
+              "Inexact search for משה רבנו  any text":
+                value:
+                  query: "משה רבנו"
+                  type: "text"
+                  field: "naive_lemmatizer"
+                  slop: 10
+                description: "Maximum distance b/w search terms is 10 words"
+              "Search for 'Moshe' in Talmud Bavli, Mesekhet Berakhot OR anywhere in Midrash":
+                value:
+                  query: Moshe
+                  type: text
+                  filters:
+                  - Talmud/Bavli/Berakhot
+                  - Midrash
+                  filter_fields:
+                  - path
+                  - path
+      responses:
+        '200':
+          description: The API returns results in the standard ElasticSearch format. See Search API (v1) for a brief explanation
+          content:
+            application/json; charset=utf-8:
+              schema:
+                $ref: '#/components/schemas/SearchResults'
+
+components:
+  schemas:
+    NameResponse:
+      type: object
+      required:
+        - lang
+        - is_ref
+        - completions
+      properties:
+        lang:
+          type: string
+          pattern: /^[a-z]{2}$/
+          example: en
+        is_ref:
+          description: Is this a Ref or not
+          type: boolean
+          example: false
+        completions:
+          type: array
+          items:
+            type: string
+        completion_objects:
+          type: array
+          items:
+            $ref: '#/components/schemas/CompletionObject'
+        type:
+          type: string
+          example: Topic
+        key:
+          type: string
+          description: Same text sent to the server
+          example: rashi
+            
+    CompletionObject:
+      type: object
+      properties:
+        title: 
+          type: string
+        type:
+          type: string
+        key:
+          type: string
+        is_primary:
+          type: boolean
+          
+    Link:
+      type: object
+      properties:
+        _id: 
+          type: string
+          example: 5896280bd6e4a91d76282ef2
+        index_title:
+          type: string
+        category:
+          type: string
+        type:
+          type: string
+        compDate:
+          type: integer
+        errorMargin:
+          type: integer
+        ref:
+          type: string
+        anchorRef:
+          type: string
+        ancorRefExpanded:
+          type: array
+          items:
+            type: string
+        sourceRef:
+          type: string
+        sourceHeRef:
+          type: string
+        anchorVerse:
+          type: integer
+        sourceHasEn:
+          type: boolean
+        commentaryNum:
+          type: number
+        collectiveTitle:
+          type: object
+          properties:
+            en:
+              type: string
+            he: 
+              type: string
+        he:
+          type: string
+          description: Text in hebrew
+        heVersionTitle: 
+          type: string
+        heLicense:
+          type: string
+        heVersionTitleInHebrew:
+          type: string
+        text:
+          type: string
+          description: Text in english
+        versionTitle:
+          type: string
+        license:
+          type: string
+        versionTitleInHebrew:
+          type: string
+          
+    SearchRequestV2:
+      type: object
+      required:
+        - query
+        - type
+      properties:
+        query:
+          type: string
+          description: Your search query
+        type:
+          type: string
+          description: The index you want to query. See Search API (v2) Index Types for an explanation of each index
+          enum:
+            - text
+            - sheet
+            - merged
+        field:
+          type: string
+          description: the field you want to query. Common fields to query are exact or `naive_lemmatizer` for the text and merged indexes. For querying the sheets index, commonly you'll query the content field
+          default: exact
+        source_proj:
+          description: bool, str or list(str) (default=False) by default, the ElasticSearch document is not returned. Specifying True will return the entire document. Specifying a str or list(str) will perform a projection on the document for the specified fields
+          type: string
+          default: false
+        slop:
+          type: integer
+          description: the maximum distance between each query word in the resulting document. 0 means an exact match must be found
+          default: 0
+        start:
+          type: integer
+          description: for paginating results. The number document to start returning. 0 means start at the first result
+          default: 0
+        size: 
+          type: integer
+          description: for paginating results. The total number of results to return, starting from start
+          default: 100
+        filters:
+          type: array
+          description: a list of filters to filter results. These filters can be RegEx if querying the text index. For the sheet type, the filters are applied literally. Each filter is applied to its corresponding entry in the `filter_fields` list
+          items:
+            type: string
+        filter_fields:
+          type: array
+          description: (required if `filters` is specified). Must be the same length as filters. Each entry specifies the field to apply the corresponding filter in `filters`
+          items:
+            type: string
+        aggs:
+          type: array
+          description:  list of fields to aggregate on. Common fields are `path` for the `text` type and `group` or `tags` for the `sheet` type
+          items:
+            type: string
+        sort_method:
+          type: string
+          description: how to sort results. If sort the values are sorted according to `sort_fields`. If `score`, the value in `sort_fields` is multiplied with the default ElasticSearch score.
+          default: sort
+          enum: 
+            - sort
+            - score
+        sort_fields:
+          type: array
+          description: list of fields to sort on. If `sort_method` = 'score' this list should have exactly one item. Common fields to sort on are `comp_date`, `order`, `pagesheetrank`, `dateCreated`, `views`
+          items:
+            type: string
+        sort_reverse:
+          type: boolean
+          default: false
+          description: whether or not to reverse the sort applied on `sort_fields`
+        sort_score_missing:
+          type: number
+          default: 0
+          description: the number used in case there is a value missing in your `sort_field`
+        
+          
+    SearchRequestV1:
+      type: object
+      
+    SearchResults:
+      type: object
