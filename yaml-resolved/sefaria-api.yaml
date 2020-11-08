@@ -16,8 +16,6 @@ servers:
   description: Sefaria Website (sefaria.org)
 - url: https://www.sefaria.org.il
   description: Sefaria Israel (sefaria.org.il)
-- url: https://virtserver.swaggerhub.com/DovOps/Sefaria-Project/1.0.2
-  description: SwaggerHub API Auto Mocking
 tags:
 - name: Index API
   description: A text index in Sefaria is a schema describing the names and structure
