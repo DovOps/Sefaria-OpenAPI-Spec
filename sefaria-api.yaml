@@ -3,10 +3,7 @@ servers:
   - description: Sefaria Website (sefaria.org)
     url: https://www.sefaria.org
   - description: Sefaria Israel (sefaria.org.il)
-    url: https://www.sefaria.org.il 
-  # Added by API Auto Mocking Plugin
-  - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/DovOps/Sefaria-Project/1.0.2
+    url: https://www.sefaria.org.il
 
 info:
   description: The Sefaria APIs allows live access to Sefaria's structured database of Jewish texts and their interconnections. It is designed to make getting up and running with a new web or mobile app as simple as possible. If you want to run your own database, please don't use this API to grab our data; instead you can download a complete dump of our data on GitHub.
